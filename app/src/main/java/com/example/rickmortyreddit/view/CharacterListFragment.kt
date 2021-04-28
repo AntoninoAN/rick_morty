@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.rickmortyreddit.MainActivity
 import com.example.rickmortyreddit.databinding.CharacterLayoutBinding
 import com.example.rickmortyreddit.databinding.CharactersFragmentLayoutBinding
@@ -88,6 +89,29 @@ class CharacterListFragment: Fragment() {
 
     private fun initViews() {
         binding.characterList.layoutManager = LinearLayoutManager(context)
+        binding.characterList.addOnScrollListener(ScrollListener())
     }
 
+    private fun loadMore(nextPage: Int){
+        viewModel.getCharacters(nextPage)
+    }
+
+    private inner class ScrollListener: RecyclerView.OnScrollListener() {
+        private var isLoading = false
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            val lManager = recyclerView.layoutManager as LinearLayoutManager
+            var visibleItemCount = binding.characterList.childCount
+            var totalItemCount = lManager.itemCount
+            var firstVisibleItemPosition = lManager.findFirstVisibleItemPosition()
+            //(totalItemCount - visibleItemCount) <= (firstVisibleItemPosition + 5))
+            if(!isLoading){
+                    if(lManager.findLastCompletelyVisibleItemPosition() ==
+                            visibleItemCount){
+                        loadMore(totalItemCount / 20 + 1)
+                        isLoading = true
+                    }
+            }
+        }
+    }
 }
