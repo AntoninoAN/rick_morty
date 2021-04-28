@@ -4,9 +4,9 @@ import com.example.rickmortyreddit.model.remote.CharacterApi
 
 class RepositoryImpl : Repository {
 
-    override suspend fun getCharacters(): AppState {
+    override suspend fun getCharacters(page: Int): AppState {
         val response =
-            CharacterApi.getCharacterApi().getCharacters()
+            CharacterApi.getCharacterApi().getCharacters(page)
         return if (response.isSuccessful) {
             if (response.body() != null) AppState.SUCCESS(response.body()!!)
             else AppState.SUCCESS()
