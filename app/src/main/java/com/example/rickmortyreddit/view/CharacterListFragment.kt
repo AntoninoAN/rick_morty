@@ -31,7 +31,9 @@ class CharacterListFragment: Fragment() {
         CharacterViewModel.CharacterViewmodelProvider(DI.provideRepository()).create(CharacterViewModel::class.java)
     }
 
-    private val adapter = CharacterAdapter(null, listener)
+    private val adapter by lazy {
+        CharacterAdapter(null, listener)
+    }
 
     private lateinit var listener: OpenDetails
 
