@@ -30,6 +30,8 @@ class CharacterListFragment: Fragment() {
         CharacterViewModel.CharacterViewmodelProvider(DI.provideRepository()).create(CharacterViewModel::class.java)
     }
 
+    private val adapter = CharacterAdapter(null, listener)
+
     private lateinit var listener: OpenDetails
 
     private lateinit var binding: CharactersFragmentLayoutBinding
@@ -80,7 +82,8 @@ class CharacterListFragment: Fragment() {
 
     private fun updateAdapter(data: CharacterResponse?) {
         listener.updateLoading(false)
-        binding.characterList.adapter = CharacterAdapter(data, listener)
+        binding.characterList.adapter = adapter
+        adapter.setDataSet(data)
     }
 
     private fun initViews() {
