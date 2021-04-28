@@ -19,9 +19,9 @@ class CharacterViewModel(private val repository: Repository): ViewModel() {
     val characterLiveData: LiveData<RepositoryImpl.AppState>
     get() = mutableCharacterData
 
-    fun getCharacters(){
+    fun getCharacters(page: Int = 1){
         viewModelScope.launch(Dispatchers.IO) {
-            val data = repository.getCharacters()
+            val data = repository.getCharacters(page)
             withContext(Dispatchers.Main){
                 mutableCharacterData.value = data
             }
