@@ -70,9 +70,12 @@ class CharacterAdapter(
     override fun getItemCount() = dataset?.results?.size ?: 1
 
     fun setDataSet(dataset: CharacterResponse?) {
-        if(dataset != null) {
-            this.dataset = dataset
-            notifyDataSetChanged()
+        this.dataset?.let {oldData->
+            dataset?.let { newData->
+                oldData.results.toMutableList().addAll(newData.results)
+            }
+            return
         }
+        this.dataset = dataset
     }
 }

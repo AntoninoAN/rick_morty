@@ -9,15 +9,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.rickmortyreddit.MainActivity
-import com.example.rickmortyreddit.databinding.CharacterLayoutBinding
+import com.example.rickmortyreddit.RickApplication
 import com.example.rickmortyreddit.databinding.CharactersFragmentLayoutBinding
-import com.example.rickmortyreddit.model.CharacterResponse
-import com.example.rickmortyreddit.model.CharacterResult
-import com.example.rickmortyreddit.model.Data
-import com.example.rickmortyreddit.model.RepositoryImpl
-import com.example.rickmortyreddit.utility.DI
+import com.example.rickmortyreddit.model.*
 import com.example.rickmortyreddit.viewmodel.CharacterViewModel
+import javax.inject.Inject
 
 class CharacterListFragment: Fragment() {
 
@@ -27,8 +23,12 @@ class CharacterListFragment: Fragment() {
         fun retryData()
     }
 
+    @Inject
+    lateinit var repository: Repository
+
     private val viewModel by lazy {
-        CharacterViewModel.CharacterViewmodelProvider(DI.provideRepository()).create(CharacterViewModel::class.java)
+        CharacterViewModel.CharacterViewmodelProvider(repository)
+            .create(CharacterViewModel::class.java)
     }
 
     private val adapter by lazy {
@@ -53,6 +53,7 @@ class CharacterListFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        RickApplication.component.inject(this)
         binding = CharactersFragmentLayoutBinding.inflate(inflater)
         initViews()
         initObservers()
@@ -106,13 +107,23 @@ class CharacterListFragment: Fragment() {
             var visibleItemCount = binding.characterList.childCount
             var totalItemCount = lManager.itemCount
             var firstVisibleItemPosition = lManager.findFirstVisibleItemPosition()
-            //(totalItemCount - visibleItemCount) <= (firstVisibleItemPosition + 5))
-            if(!isLoading){
-                    if(lManager.findLastCompletelyVisibleItemPosition() ==
-                            visibleItemCount){
-                        loadMore(totalItemCount / 20 + 1)
-                        isLoading = true
-                    }
+            var previousTotal = totalItemCount
+
+            if(isLoading)
+                if(totalItemCount >= previousTotal){
+                    isLoading = false
+                    previousTotal = totalItemCount
+                }
+//            if(!isLoading){
+//                    if(lManager.findLastCompletelyVisibleItemPosition() ==
+//                            visibleItemCount){
+//                        loadMore(totalItemCount / 20 + 1)
+//                        isLoading = true
+//                    }
+//            }
+            if(!isLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItemPosition + 5)){
+                loadMore(totalItemCount / 20 + 1)
+                isLoading = true
             }
         }
     }

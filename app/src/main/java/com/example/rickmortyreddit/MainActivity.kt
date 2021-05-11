@@ -3,7 +3,6 @@ package com.example.rickmortyreddit
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import androidx.core.os.bundleOf
 import com.example.rickmortyreddit.databinding.ActivityMainBinding
 import com.example.rickmortyreddit.model.CharacterResult
 import com.example.rickmortyreddit.view.CharacterDetailsFragment
@@ -34,7 +33,7 @@ class MainActivity : AppCompatActivity(), CharacterListFragment.OpenDetails {
 
     override fun openDetailCharacter(data: CharacterResult) {
         supportFragmentManager.beginTransaction()
-            .replace(android.R.id.content, CharacterDetailsFragment.newInstance(data))
+            .replace(R.id.fragment_container, CharacterDetailsFragment.newInstance(data))
             .addToBackStack(null)
             .commit()
     }
