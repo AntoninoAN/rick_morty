@@ -1,13 +1,15 @@
 package com.example.rickmortyreddit.model
 
+import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import java.io.Serializable
 
 typealias Amount = Int
 typealias Data = String
 data class CharacterResponse(
     val info: CharacterPage,
-    val results: List<CharacterResult>
+    var results: List<CharacterResult>
 )
 
 data class CharacterPage(
