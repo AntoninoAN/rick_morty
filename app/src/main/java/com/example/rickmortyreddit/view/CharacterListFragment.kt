@@ -8,15 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.rickmortyreddit.MainActivity
-import com.example.rickmortyreddit.databinding.CharacterLayoutBinding
+import androidx.recyclerview.widget.RecyclerView
+import com.example.rickmortyreddit.RickApplication
 import com.example.rickmortyreddit.databinding.CharactersFragmentLayoutBinding
-import com.example.rickmortyreddit.model.CharacterResponse
-import com.example.rickmortyreddit.model.CharacterResult
-import com.example.rickmortyreddit.model.Data
-import com.example.rickmortyreddit.model.RepositoryImpl
-import com.example.rickmortyreddit.utility.DI
+import com.example.rickmortyreddit.model.*
 import com.example.rickmortyreddit.viewmodel.CharacterViewModel
+import javax.inject.Inject
 
 class CharacterListFragment: Fragment() {
 
@@ -26,8 +23,16 @@ class CharacterListFragment: Fragment() {
         fun retryData()
     }
 
+    @Inject
+    lateinit var repository: Repository
+
     private val viewModel by lazy {
-        CharacterViewModel.CharacterViewmodelProvider(DI.provideRepository()).create(CharacterViewModel::class.java)
+        CharacterViewModel.CharacterViewmodelProvider(repository)
+            .create(CharacterViewModel::class.java)
+    }
+
+    private val adapter by lazy {
+        CharacterAdapter(null, listener)
     }
 
     private lateinit var listener: OpenDetails
@@ -48,6 +53,7 @@ class CharacterListFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        RickApplication.component.inject(this)
         binding = CharactersFragmentLayoutBinding.inflate(inflater)
         initViews()
         initObservers()
@@ -80,11 +86,45 @@ class CharacterListFragment: Fragment() {
 
     private fun updateAdapter(data: CharacterResponse?) {
         listener.updateLoading(false)
-        binding.characterList.adapter = CharacterAdapter(data, listener)
+        binding.characterList.adapter = adapter
+        adapter.setDataSet(data)
     }
 
     private fun initViews() {
         binding.characterList.layoutManager = LinearLayoutManager(context)
+        binding.characterList.addOnScrollListener(ScrollListener())
     }
 
+    private fun loadMore(nextPage: Int){
+        viewModel.getCharacters(nextPage)
+    }
+
+    private inner class ScrollListener: RecyclerView.OnScrollListener() {
+        private var isLoading = false
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            val lManager = recyclerView.layoutManager as LinearLayoutManager
+            var visibleItemCount = binding.characterList.childCount
+            var totalItemCount = lManager.itemCount
+            var firstVisibleItemPosition = lManager.findFirstVisibleItemPosition()
+            var previousTotal = totalItemCount
+
+            if(isLoading)
+                if(totalItemCount >= previousTotal){
+                    isLoading = false
+                    previousTotal = totalItemCount
+                }
+//            if(!isLoading){
+//                    if(lManager.findLastCompletelyVisibleItemPosition() ==
+//                            visibleItemCount){
+//                        loadMore(totalItemCount / 20 + 1)
+//                        isLoading = true
+//                    }
+//            }
+            if(!isLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItemPosition + 5)){
+                loadMore(totalItemCount / 20 + 1)
+                isLoading = true
+            }
+        }
+    }
 }

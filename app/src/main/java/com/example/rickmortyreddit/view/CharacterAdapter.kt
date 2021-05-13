@@ -13,7 +13,7 @@ import com.example.rickmortyreddit.model.CharacterResult
 import com.squareup.picasso.Picasso
 
 class CharacterAdapter(
-    private val dataset: CharacterResponse?,
+    private var dataset: CharacterResponse?,
     private val callback: CharacterListFragment.OpenDetails
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -68,4 +68,14 @@ class CharacterAdapter(
     }
 
     override fun getItemCount() = dataset?.results?.size ?: 1
+
+    fun setDataSet(dataset: CharacterResponse?) {
+        this.dataset?.let {oldData->
+            dataset?.let { newData->
+                oldData.results.toMutableList().addAll(newData.results)
+            }
+            return
+        }
+        this.dataset = dataset
+    }
 }
